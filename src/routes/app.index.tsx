@@ -10,7 +10,7 @@ import { ArrowDownRight, ArrowUpRight, Wallet, Plus, Lightbulb } from "lucide-re
 import { useAuth } from "@/hooks/use-auth";
 import { useCategories, useTransactions, useGoals, formatBRL } from "@/hooks/use-finance";
 
-export const Route = createFileRoute("/_authed/")({
+export const Route = createFileRoute("/app/")({
   component: Dashboard,
 });
 

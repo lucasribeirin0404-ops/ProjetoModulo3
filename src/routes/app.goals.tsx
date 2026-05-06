@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useGoals, formatBRL } from "@/hooks/use-finance";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authed/goals")({
+export const Route = createFileRoute("/app/goals")({
   component: GoalsPage,
 });
 

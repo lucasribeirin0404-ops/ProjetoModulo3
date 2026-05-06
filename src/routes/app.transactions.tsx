@@ -13,7 +13,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useCategories, useTransactions, formatBRL } from "@/hooks/use-finance";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authed/transactions")({
+export const Route = createFileRoute("/app/transactions")({
   component: TransactionsPage,
 });
 

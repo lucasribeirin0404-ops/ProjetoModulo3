@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authed/insights")({
+export const Route = createFileRoute("/app/insights")({
   component: InsightsPage,
 });
 

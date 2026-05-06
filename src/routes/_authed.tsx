@@ -1,9 +1,8 @@
-import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { AppShell } from "@/components/app/AppShell";
 import { Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authed")({
   component: AuthedLayout,
@@ -29,6 +28,3 @@ function AuthedLayout() {
     </AppShell>
   );
 }
-
-// silence unused
-void supabase; void redirect;

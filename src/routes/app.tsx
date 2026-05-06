@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { AppShell } from "@/components/app/AppShell";
 import { Loader2 } from "lucide-react";
 
-export const Route = createFileRoute("/_authed")({
+export const Route = createFileRoute("/app")({
   component: AuthedLayout,
 });
 

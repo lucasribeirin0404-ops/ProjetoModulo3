@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Sparkles, LayoutDashboard, ListPlus, Target, Lightbulb, LogOut } from "lucide-react";
+import { Sparkles, LayoutDashboard, ListPlus, Target, Lightbulb, LogOut, Repeat } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import type { ReactNode } from "react";
@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 const nav = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard },
   { to: "/app/transactions", label: "Transações", icon: ListPlus },
+  { to: "/app/recurring", label: "Gastos fixos", icon: Repeat },
   { to: "/app/goals", label: "Metas", icon: Target },
   { to: "/app/insights", label: "Insights IA", icon: Lightbulb },
 ];

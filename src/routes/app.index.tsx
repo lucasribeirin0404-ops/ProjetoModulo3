@@ -9,6 +9,8 @@ import {
 import { ArrowDownRight, ArrowUpRight, Wallet, Plus, Lightbulb } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useCategories, useTransactions, useGoals, formatBRL } from "@/hooks/use-finance";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/app/")({
   component: Dashboard,
@@ -20,6 +22,18 @@ function Dashboard() {
   const { data: cats = [] } = useCategories();
   const { data: goals = [] } = useGoals();
 
+  const { data: recurring = [] } = useQuery({
+    queryKey: ["recurring", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("recurring_expenses")
+        .select("amount,kind,is_active");
+      if (error) throw error;
+      return (data as any[]).map((r) => ({ ...r, amount: Number(r.amount) }));
+    },
+  });
+
   const stats = useMemo(() => {
     const now = new Date();
     const monthTx = txs.filter((t) => {
@@ -28,11 +42,15 @@ function Dashboard() {
     });
     const income = monthTx.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
     const expense = monthTx.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
-    const balance = income - expense;
+    const recIncome = recurring.filter((r: any) => r.is_active && r.kind === "income").reduce((s: number, r: any) => s + r.amount, 0);
+    const recExpense = recurring.filter((r: any) => r.is_active && r.kind === "expense").reduce((s: number, r: any) => s + r.amount, 0);
+    const incomeTotal = income + recIncome;
+    const expenseTotal = expense + recExpense;
+    const balance = incomeTotal - expenseTotal;
     const totalIncome = txs.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
     const totalExpense = txs.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
-    return { income, expense, balance, total: totalIncome - totalExpense };
-  }, [txs]);
+    return { income: incomeTotal, expense: expenseTotal, balance, total: totalIncome - totalExpense + recIncome - recExpense };
+  }, [txs, recurring]);
 
   const byCategory = useMemo(() => {
     const map = new Map<string, { name: string; value: number; color: string }>();

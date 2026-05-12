@@ -1,1 +1,0 @@
-ALTER TABLE public.recurring_expenses ADD COLUMN IF NOT EXISTS kind text NOT NULL DEFAULT 'expense' CHECK (kind IN ('expense','income'));

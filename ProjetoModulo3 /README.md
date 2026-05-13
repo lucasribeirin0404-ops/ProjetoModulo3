@@ -1,8 +1,3 @@
-📂 Estrutura inicial do repositório sugerida:
-
-Estrutura_Projeto_GitHub_LowCode_NoCode.png
-
-
 # Projeto Módulo 3 – Low Code/No Code/Vibecode
 
 ## 📌 Desafio Escolhido

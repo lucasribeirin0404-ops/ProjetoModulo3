@@ -18,7 +18,7 @@ Descreva aqui o desafio proposto pelo grupo (ex.: cadastro de usuários, automa�
 
 ## ⚙️ Plataforma Utilizada
 
-- Nome da plataforma (ex.: Bubble, Make, Pipedream).
+- Nome da plataforma: Lovable.
 
 - Justificativa da escolha: por que essa ferramenta foi selecionada para o desafio?
 

@@ -14,6 +14,7 @@ Descreva aqui o desafio proposto pelo grupo (ex.: cadastro de usuários, automa�
 
 > Coloque os arquivos de imagem ou PDF na pasta `/docs`.
 
+-Link do protótipo: [Protótipo](https://lucasribeirin0404-ops.github.io/ProjetoModulo3/finansmart.html)
 ---
 
 ## ⚙️ Plataforma Utilizada

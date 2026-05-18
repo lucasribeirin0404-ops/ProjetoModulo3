@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FinanSmart — Auxiliador Financeiro Pessoal</title>
+<meta name="description" content="Planejamento financeiro, controle de gastos, metas e recomendações personalizadas." />
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#111a2e; --panel2:#152038; --muted:#8aa0c6;
+    --text:#e8eefc; --primary:#22d3ee; --primary2:#6366f1; --success:#10b981;
+    --warn:#f59e0b; --danger:#ef4444; --border:#1f2b48;
+  }
+  html,body{background:linear-gradient(180deg,#070b16,#0b1220 40%,#0b1220);color:var(--text);font-family:Inter,system-ui,sans-serif}
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--border);border-radius:1rem}
+  .chip{background:#0e1730;border:1px solid var(--border);color:var(--muted)}
+  .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#06121f;font-weight:600}
+  .btn-primary:hover{filter:brightness(1.08)}
+  .input{background:#0a1226;border:1px solid var(--border);color:var(--text);border-radius:.6rem;padding:.55rem .75rem;width:100%}
+  .input:focus{outline:none;border-color:var(--primary)}
+  .tab.active{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#06121f}
+  .scroll::-webkit-scrollbar{width:8px;height:8px}
+  .scroll::-webkit-scrollbar-thumb{background:#1f2b48;border-radius:8px}
+  .badge{font-size:.7rem;padding:.15rem .5rem;border-radius:9999px}
+  .grad-text{background:linear-gradient(135deg,#22d3ee,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent}
+</style>
+</head>
+<body class="min-h-screen">
+
+<header class="border-b border-[var(--border)] bg-[#0a1124]/80 backdrop-blur sticky top-0 z-30">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 to-indigo-500 flex items-center justify-center font-black text-slate-900">F$</div>
+      <div>
+        <h1 class="text-lg font-bold">FinanSmart</h1>
+        <p class="text-xs text-[var(--muted)]">Seu auxiliador financeiro pessoal</p>
+      </div>
+    </div>
+    <nav class="hidden md:flex gap-6 text-sm text-[var(--muted)]">
+      <a href="#dashboard" class="hover:text-white">Dashboard</a>
+      <a href="#transacoes" class="hover:text-white">Transações</a>
+      <a href="#metas" class="hover:text-white">Metas</a>
+      <a href="#recomendacoes" class="hover:text-white">Recomendações</a>
+      <a href="#relatorios" class="hover:text-white">Relatórios</a>
+    </nav>
+    <button onclick="exportarRelatorio()" class="btn-primary px-4 py-2 rounded-lg text-sm">Exportar Relatório</button>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="max-w-7xl mx-auto px-6 pt-10 pb-6">
+  <div class="grid md:grid-cols-3 gap-4">
+    <div class="md:col-span-2 card p-6">
+      <span class="chip px-3 py-1 rounded-full text-xs">Olá 👋, vamos cuidar do seu dinheiro</span>
+      <h2 class="text-3xl md:text-4xl font-bold mt-3">Controle, <span class="grad-text">planeje</span> e alcance suas metas.</h2>
+      <p class="text-[var(--muted)] mt-2 max-w-xl">Registre suas receitas e despesas, acompanhe gráficos interativos, defina metas e receba recomendações personalizadas com base no seu perfil.</p>
+      <div class="flex gap-3 mt-5">
+        <a href="#transacoes" class="btn-primary px-4 py-2 rounded-lg text-sm">Adicionar transação</a>
+        <a href="#metas" class="chip px-4 py-2 rounded-lg text-sm">Definir meta</a>
+      </div>
+    </div>
+    <div class="card p-6">
+      <p class="text-sm text-[var(--muted)]">Perfil de planejamento</p>
+      <div class="flex gap-2 mt-3 flex-wrap">
+        <button data-perfil="conservador" class="perfil chip px-3 py-2 rounded-lg text-sm">🛡️ Conservador</button>
+        <button data-perfil="moderado" class="perfil chip px-3 py-2 rounded-lg text-sm">⚖️ Moderado</button>
+        <button data-perfil="agressivo" class="perfil chip px-3 py-2 rounded-lg text-sm">🚀 Agressivo</button>
+      </div>
+      <p class="text-xs text-[var(--muted)] mt-3">Escolha como deseja que o sistema personalize seus planos e recomendações.</p>
+      <div class="mt-4 p-3 rounded-lg bg-[#0a1226] border border-[var(--border)]">
+        <p class="text-xs text-[var(--muted)]">Perfil atual</p>
+        <p id="perfilAtual" class="font-semibold mt-1">Moderado</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DASHBOARD -->
+<section id="dashboard" class="max-w-7xl mx-auto px-6 py-6">
+  <h3 class="text-xl font-bold mb-4">Dashboard</h3>
+  <div class="grid md:grid-cols-4 gap-4">
+    <div class="card p-5">
+      <p class="text-xs text-[var(--muted)]">Saldo do mês</p>
+      <p id="kpiSaldo" class="text-2xl font-bold mt-1">R$ 0,00</p>
+      <span id="kpiSaldoBadge" class="badge mt-2 inline-block bg-emerald-500/20 text-emerald-300">+0%</span>
+    </div>
+    <div class="card p-5">
+      <p class="text-xs text-[var(--muted)]">Receitas</p>
+      <p id="kpiReceitas" class="text-2xl font-bold mt-1 text-emerald-400">R$ 0,00</p>
+    </div>
+    <div class="card p-5">
+      <p class="text-xs text-[var(--muted)]">Despesas</p>
+      <p id="kpiDespesas" class="text-2xl font-bold mt-1 text-rose-400">R$ 0,00</p>
+    </div>
+    <div class="card p-5">
+      <p class="text-xs text-[var(--muted)]">Taxa de poupança</p>
+      <p id="kpiPoupanca" class="text-2xl font-bold mt-1">0%</p>
+      <div class="w-full h-2 bg-[#0a1226] rounded-full mt-2 overflow-hidden">
+        <div id="kpiPoupancaBar" class="h-full bg-gradient-to-r from-cyan-400 to-indigo-500" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid md:grid-cols-3 gap-4 mt-4">
+    <div class="card p-5 md:col-span-2">
+      <div class="flex items-center justify-between mb-3">
+        <h4 class="font-semibold">Fluxo mensal (receitas x despesas)</h4>
+        <span class="chip text-xs px-2 py-1 rounded-full">Últimos 6 meses</span>
+      </div>
+      <canvas id="chartFluxo" height="120"></canvas>
+    </div>
+    <div class="card p-5">
+      <h4 class="font-semibold mb-3">Gastos por categoria</h4>
+      <canvas id="chartCategorias" height="180"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- TRANSAÇÕES -->
+<section id="transacoes" class="max-w-7xl mx-auto px-6 py-6">
+  <h3 class="text-xl font-bold mb-4">Transações</h3>
+  <div class="grid md:grid-cols-3 gap-4">
+    <div class="card p-5">
+      <h4 class="font-semibold mb-3">Nova transação</h4>
+      <form id="formTx" class="space-y-3">
+        <div class="flex gap-2">
+          <button type="button" data-tipo="receita" class="tipoBtn flex-1 chip py-2 rounded-lg text-sm">Receita</button>
+          <button type="button" data-tipo="despesa" class="tipoBtn flex-1 chip py-2 rounded-lg text-sm active">Despesa</button>
+        </div>
+        <input id="txDesc" class="input" placeholder="Descrição (ex.: Mercado)" required />
+        <input id="txValor" type="number" step="0.01" min="0.01" class="input" placeholder="Valor (R$)" required />
+        <select id="txCat" class="input">
+          <option>Alimentação</option><option>Moradia</option><option>Transporte</option>
+          <option>Lazer</option><option>Saúde</option><option>Educação</option>
+          <option>Assinaturas</option><option>Salário</option><option>Investimentos</option><option>Outros</option>
+        </select>
+        <input id="txData" type="date" class="input" />
+        <button class="btn-primary w-full py-2 rounded-lg">Adicionar</button>
+      </form>
+    </div>
+    <div class="card p-5 md:col-span-2">
+      <div class="flex items-center justify-between mb-3">
+        <h4 class="font-semibold">Histórico</h4>
+        <div class="flex gap-2">
+          <input id="filtro" class="input !py-1.5" placeholder="Buscar..." />
+          <button onclick="limparTudo()" class="chip px-3 rounded-lg text-xs">Limpar</button>
+        </div>
+      </div>
+      <div class="scroll overflow-auto max-h-96">
+        <table class="w-full text-sm">
+          <thead class="text-[var(--muted)] text-left text-xs uppercase">
+            <tr><th class="py-2">Data</th><th>Descrição</th><th>Categoria</th><th class="text-right">Valor</th><th></th></tr>
+          </thead>
+          <tbody id="tbodyTx"></tbody>
+        </table>
+        <p id="vazio" class="text-center text-sm text-[var(--muted)] py-8">Nenhuma transação ainda. Adicione a primeira!</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- METAS -->
+<section id="metas" class="max-w-7xl mx-auto px-6 py-6">
+  <h3 class="text-xl font-bold mb-4">Metas financeiras</h3>
+  <div class="grid md:grid-cols-3 gap-4">
+    <div class="card p-5">
+      <h4 class="font-semibold mb-3">Nova meta</h4>
+      <form id="formMeta" class="space-y-3">
+        <input id="metaNome" class="input" placeholder="Ex.: Reserva de emergência" required />
+        <input id="metaAlvo" type="number" step="0.01" min="1" class="input" placeholder="Valor alvo (R$)" required />
+        <input id="metaAtual" type="number" step="0.01" min="0" class="input" placeholder="Já guardado (R$)" value="0" />
+        <input id="metaPrazo" type="date" class="input" />
+        <button class="btn-primary w-full py-2 rounded-lg">Criar meta</button>
+      </form>
+    </div>
+    <div class="md:col-span-2 grid sm:grid-cols-2 gap-4" id="listaMetas"></div>
+  </div>
+</section>
+
+<!-- RECOMENDAÇÕES -->
+<section id="recomendacoes" class="max-w-7xl mx-auto px-6 py-6">
+  <h3 class="text-xl font-bold mb-4">Recomendações personalizadas</h3>
+  <div id="recList" class="grid md:grid-cols-3 gap-4"></div>
+</section>
+
+<!-- RELATÓRIOS -->
+<section id="relatorios" class="max-w-7xl mx-auto px-6 py-6 pb-20">
+  <h3 class="text-xl font-bold mb-4">Relatórios</h3>
+  <div class="grid md:grid-cols-2 gap-4">
+    <div class="card p-5">
+      <h4 class="font-semibold mb-3">Evolução do saldo acumulado</h4>
+      <canvas id="chartSaldo" height="160"></canvas>
+    </div>
+    <div class="card p-5">
+      <h4 class="font-semibold mb-3">Top categorias de gasto</h4>
+      <canvas id="chartTop" height="160"></canvas>
+    </div>
+  </div>
+</section>
+
+<footer class="border-t border-[var(--border)] py-6 text-center text-xs text-[var(--muted)]">
+  © <span id="ano"></span> FinanSmart · Seus dados ficam salvos apenas no seu navegador.
+</footer>
+
+<script>
+const LS = 'finansmart_v1';
+const state = JSON.parse(localStorage.getItem(LS) || 'null') || {
+  perfil: 'moderado', tipoTx: 'despesa', txs: [], metas: []
+};
+const fmt = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const save = () => localStorage.setItem(LS, JSON.stringify(state));
+document.getElementById('ano').textContent = new Date().getFullYear();
+document.getElementById('txData').valueAsDate = new Date();
+
+// Perfil
+document.querySelectorAll('.perfil').forEach(b=>{
+  b.onclick=()=>{state.perfil=b.dataset.perfil;save();render();}
+});
+
+// Tipo
+document.querySelectorAll('.tipoBtn').forEach(b=>{
+  b.onclick=()=>{state.tipoTx=b.dataset.tipo;document.querySelectorAll('.tipoBtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');}
+});
+
+// Form tx
+document.getElementById('formTx').onsubmit = e => {
+  e.preventDefault();
+  state.txs.push({
+    id:Date.now(), tipo:state.tipoTx,
+    desc:txDesc.value, valor:parseFloat(txValor.value),
+    cat:state.tipoTx==='receita'?'Salário':txCat.value,
+    data:txData.value || new Date().toISOString().slice(0,10)
+  });
+  save(); e.target.reset(); txData.valueAsDate=new Date(); render();
+};
+
+// Filtro
+document.getElementById('filtro').oninput = render;
+
+// Limpar
+function limparTudo(){ if(confirm('Apagar todas as transações?')){state.txs=[];save();render();}}
+
+// Metas
+document.getElementById('formMeta').onsubmit = e => {
+  e.preventDefault();
+  state.metas.push({id:Date.now(),nome:metaNome.value,alvo:+metaAlvo.value,atual:+metaAtual.value||0,prazo:metaPrazo.value});
+  save(); e.target.reset(); render();
+};
+
+let chartFluxo, chartCategorias, chartSaldo, chartTop;
+
+function render(){
+  // Perfil
+  document.getElementById('perfilAtual').textContent = state.perfil[0].toUpperCase()+state.perfil.slice(1);
+  document.querySelectorAll('.perfil').forEach(b=>b.classList.toggle('active',b.dataset.perfil===state.perfil));
+
+  // KPIs mês atual
+  const hoje = new Date(); const m=hoje.getMonth(),y=hoje.getFullYear();
+  const txMes = state.txs.filter(t=>{const d=new Date(t.data);return d.getMonth()===m&&d.getFullYear()===y;});
+  const rec = txMes.filter(t=>t.tipo==='receita').reduce((a,b)=>a+b.valor,0);
+  const desp = txMes.filter(t=>t.tipo==='despesa').reduce((a,b)=>a+b.valor,0);
+  const saldo = rec-desp;
+  kpiSaldo.textContent=fmt(saldo); kpiReceitas.textContent=fmt(rec); kpiDespesas.textContent=fmt(desp);
+  const pp = rec>0?Math.max(0,Math.round((saldo/rec)*100)):0;
+  kpiPoupanca.textContent=pp+'%'; kpiPoupancaBar.style.width=Math.min(100,pp)+'%';
+  kpiSaldoBadge.textContent=(saldo>=0?'+':'')+(rec?Math.round(saldo/rec*100):0)+'%';
+  kpiSaldoBadge.className='badge mt-2 inline-block '+(saldo>=0?'bg-emerald-500/20 text-emerald-300':'bg-rose-500/20 text-rose-300');
+
+  // Tabela
+  const filtro = document.getElementById('filtro').value.toLowerCase();
+  const lista = [...state.txs].sort((a,b)=>b.data.localeCompare(a.data))
+    .filter(t=>!filtro || t.desc.toLowerCase().includes(filtro) || t.cat.toLowerCase().includes(filtro));
+  vazio.style.display = lista.length?'none':'block';
+  tbodyTx.innerHTML = lista.map(t=>`
+    <tr class="border-t border-[var(--border)]">
+      <td class="py-2 text-[var(--muted)]">${new Date(t.data).toLocaleDateString('pt-BR')}</td>
+      <td>${t.desc}</td>
+      <td><span class="chip text-xs px-2 py-0.5 rounded-full">${t.cat}</span></td>
+      <td class="text-right font-semibold ${t.tipo==='receita'?'text-emerald-400':'text-rose-400'}">${t.tipo==='receita'?'+':'-'}${fmt(t.valor)}</td>
+      <td class="text-right"><button onclick="delTx(${t.id})" class="text-[var(--muted)] hover:text-rose-400">✕</button></td>
+    </tr>`).join('');
+
+  // Charts fluxo 6 meses
+  const labels=[],recs=[],desps=[];
+  for(let i=5;i>=0;i--){
+    const d=new Date(y,m-i,1);
+    labels.push(d.toLocaleDateString('pt-BR',{month:'short'}));
+    const r=state.txs.filter(t=>{const dt=new Date(t.data);return dt.getMonth()===d.getMonth()&&dt.getFullYear()===d.getFullYear()&&t.tipo==='receita';}).reduce((a,b)=>a+b.valor,0);
+    const dd=state.txs.filter(t=>{const dt=new Date(t.data);return dt.getMonth()===d.getMonth()&&dt.getFullYear()===d.getFullYear()&&t.tipo==='despesa';}).reduce((a,b)=>a+b.valor,0);
+    recs.push(r); desps.push(dd);
+  }
+  chartFluxo?.destroy();
+  chartFluxo = new Chart(document.getElementById('chartFluxo'),{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'Receitas',data:recs,backgroundColor:'#10b981'},
+      {label:'Despesas',data:desps,backgroundColor:'#ef4444'}
+    ]},
+    options:{plugins:{legend:{labels:{color:'#e8eefc'}}},scales:{x:{ticks:{color:'#8aa0c6'},grid:{display:false}},y:{ticks:{color:'#8aa0c6'},grid:{color:'#1f2b48'}}}}
+  });
+
+  // Categorias
+  const cats={}; txMes.filter(t=>t.tipo==='despesa').forEach(t=>cats[t.cat]=(cats[t.cat]||0)+t.valor);
+  chartCategorias?.destroy();
+  chartCategorias = new Chart(document.getElementById('chartCategorias'),{
+    type:'doughnut',
+    data:{labels:Object.keys(cats),datasets:[{data:Object.values(cats),backgroundColor:['#22d3ee','#6366f1','#f59e0b','#10b981','#ef4444','#a78bfa','#f472b6','#34d399','#fbbf24','#60a5fa']}]},
+    options:{plugins:{legend:{position:'bottom',labels:{color:'#e8eefc',font:{size:11}}}}}
+  });
+
+  // Saldo acumulado
+  const ord = [...state.txs].sort((a,b)=>a.data.localeCompare(b.data));
+  let acc=0; const sLab=[],sVal=[];
+  ord.forEach(t=>{acc+=t.tipo==='receita'?t.valor:-t.valor;sLab.push(new Date(t.data).toLocaleDateString('pt-BR'));sVal.push(acc);});
+  chartSaldo?.destroy();
+  chartSaldo = new Chart(document.getElementById('chartSaldo'),{
+    type:'line',
+    data:{labels:sLab,datasets:[{label:'Saldo',data:sVal,borderColor:'#22d3ee',backgroundColor:'rgba(34,211,238,.15)',fill:true,tension:.3}]},
+    options:{plugins:{legend:{labels:{color:'#e8eefc'}}},scales:{x:{ticks:{color:'#8aa0c6'}},y:{ticks:{color:'#8aa0c6'},grid:{color:'#1f2b48'}}}}
+  });
+
+  // Top categorias geral
+  const catsAll={}; state.txs.filter(t=>t.tipo==='despesa').forEach(t=>catsAll[t.cat]=(catsAll[t.cat]||0)+t.valor);
+  const sorted=Object.entries(catsAll).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  chartTop?.destroy();
+  chartTop = new Chart(document.getElementById('chartTop'),{
+    type:'bar',
+    data:{labels:sorted.map(s=>s[0]),datasets:[{label:'Total',data:sorted.map(s=>s[1]),backgroundColor:'#6366f1'}]},
+    options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#8aa0c6'},grid:{color:'#1f2b48'}},y:{ticks:{color:'#8aa0c6'}}}}
+  });
+
+  // Metas
+  listaMetas.innerHTML = state.metas.length ? state.metas.map(m=>{
+    const p = Math.min(100,Math.round((m.atual/m.alvo)*100));
+    return `<div class="card p-5">
+      <div class="flex justify-between items-start"><div>
+        <p class="font-semibold">${m.nome}</p>
+        <p class="text-xs text-[var(--muted)]">${m.prazo?'Até '+new Date(m.prazo).toLocaleDateString('pt-BR'):'Sem prazo'}</p>
+      </div><button onclick="delMeta(${m.id})" class="text-[var(--muted)] hover:text-rose-400">✕</button></div>
+      <p class="mt-3 text-sm">${fmt(m.atual)} <span class="text-[var(--muted)]">/ ${fmt(m.alvo)}</span></p>
+      <div class="w-full h-2 bg-[#0a1226] rounded-full mt-2 overflow-hidden"><div class="h-full bg-gradient-to-r from-cyan-400 to-indigo-500" style="width:${p}%"></div></div>
+      <div class="flex gap-2 mt-3">
+        <input type="number" min="0" step="0.01" placeholder="Adicionar R$" id="add-${m.id}" class="input !py-1.5 text-sm" />
+        <button onclick="addMeta(${m.id})" class="btn-primary px-3 rounded-lg text-sm">+</button>
+      </div>
+    </div>`;
+  }).join('') : `<div class="card p-5 text-sm text-[var(--muted)] sm:col-span-2">Nenhuma meta criada ainda.</div>`;
+
+  // Recomendações
+  renderRecs(rec,desp,cats);
+}
+
+function renderRecs(rec,desp,cats){
+  const recs=[];
+  const perfilCfg={conservador:{poup:30,limite:0.5},moderado:{poup:20,limite:0.7},agressivo:{poup:10,limite:0.85}}[state.perfil];
+  const tx = rec>0?(rec-desp)/rec*100:0;
+  if(rec===0) recs.push({t:'Registre suas receitas',d:'Adicione seu salário ou outras entradas para começarmos a planejar.',c:'bg-cyan-500/20 text-cyan-300',ic:'💡'});
+  if(rec>0 && tx<perfilCfg.poup) recs.push({t:'Aumente sua poupança',d:`Seu perfil ${state.perfil} sugere poupar ao menos ${perfilCfg.poup}% da renda. Atual: ${Math.round(tx)}%.`,c:'bg-amber-500/20 text-amber-300',ic:'⚠️'});
+  if(desp>rec*perfilCfg.limite && rec>0) recs.push({t:'Despesas elevadas',d:`Suas despesas representam ${Math.round(desp/rec*100)}% da renda. Reveja categorias com maior gasto.`,c:'bg-rose-500/20 text-rose-300',ic:'🔻'});
+  const top = Object.entries(cats).sort((a,b)=>b[1]-a[1])[0];
+  if(top) recs.push({t:`Atenção com ${top[0]}`,d:`Maior gasto do mês: ${fmt(top[1])}. Defina um teto mensal para essa categoria.`,c:'bg-indigo-500/20 text-indigo-300',ic:'📊'});
+  if(state.metas.length===0) recs.push({t:'Crie sua primeira meta',d:'Comece pela reserva de emergência: 3 a 6 meses de despesas guardados.',c:'bg-emerald-500/20 text-emerald-300',ic:'🎯'});
+  if(state.perfil==='agressivo') recs.push({t:'Diversifique investimentos',d:'Considere alocar parte do excedente em renda variável de acordo com sua tolerância a risco.',c:'bg-violet-500/20 text-violet-300',ic:'🚀'});
+  if(state.perfil==='conservador') recs.push({t:'Priorize segurança',d:'Tesouro Selic e CDBs de liquidez diária são ótimos para reserva e perfil conservador.',c:'bg-cyan-500/20 text-cyan-300',ic:'🛡️'});
+  if(recs.length===0) recs.push({t:'Tudo sob controle ✨',d:'Continue acompanhando seus indicadores semanalmente.',c:'bg-emerald-500/20 text-emerald-300',ic:'✅'});
+
+  recList.innerHTML = recs.map(r=>`
+    <div class="card p-5">
+      <div class="flex items-center gap-2"><span class="text-2xl">${r.ic}</span><span class="badge ${r.c}">Dica</span></div>
+      <p class="font-semibold mt-2">${r.t}</p>
+      <p class="text-sm text-[var(--muted)] mt-1">${r.d}</p>
+    </div>`).join('');
+}
+
+function delTx(id){state.txs=state.txs.filter(t=>t.id!==id);save();render();}
+function delMeta(id){state.metas=state.metas.filter(t=>t.id!==id);save();render();}
+function addMeta(id){const v=parseFloat(document.getElementById('add-'+id).value);if(!v)return;const m=state.metas.find(x=>x.id===id);m.atual+=v;save();render();}
+
+function exportarRelatorio(){
+  const hoje=new Date(); const m=hoje.getMonth(),y=hoje.getFullYear();
+  const txMes=state.txs.filter(t=>{const d=new Date(t.data);return d.getMonth()===m&&d.getFullYear()===y;});
+  const rec=txMes.filter(t=>t.tipo==='receita').reduce((a,b)=>a+b.valor,0);
+  const desp=txMes.filter(t=>t.tipo==='despesa').reduce((a,b)=>a+b.valor,0);
+  let csv='Data;Tipo;Categoria;Descrição;Valor\n';
+  state.txs.forEach(t=>csv+=`${t.data};${t.tipo};${t.cat};${t.desc};${t.valor.toFixed(2)}\n`);
+  csv+=`\nResumo do mês;;;;\nReceitas;;;;${rec.toFixed(2)}\nDespesas;;;;${desp.toFixed(2)}\nSaldo;;;;${(rec-desp).toFixed(2)}\n`;
+  const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='relatorio-finansmart.csv'; a.click();
+}
+
+// Seed inicial demo
+if(state.txs.length===0){
+  const hoje=new Date();
+  const d=(off)=>new Date(hoje.getFullYear(),hoje.getMonth(),hoje.getDate()-off).toISOString().slice(0,10);
+  state.txs=[
+    {id:1,tipo:'receita',desc:'Salário',valor:5500,cat:'Salário',data:d(20)},
+    {id:2,tipo:'despesa',desc:'Aluguel',valor:1500,cat:'Moradia',data:d(18)},
+    {id:3,tipo:'despesa',desc:'Mercado',valor:680,cat:'Alimentação',data:d(10)},
+    {id:4,tipo:'despesa',desc:'Uber',valor:120,cat:'Transporte',data:d(7)},
+    {id:5,tipo:'despesa',desc:'Netflix',valor:45,cat:'Assinaturas',data:d(5)},
+    {id:6,tipo:'despesa',desc:'Restaurante',valor:230,cat:'Lazer',data:d(3)},
+  ];
+  save();
+}
+render();
+</script>
+</body>
+</html>

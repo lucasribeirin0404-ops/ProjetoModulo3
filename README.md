@@ -4,7 +4,7 @@
 
 Descreva aqui o desafio proposto pelo grupo (ex.: cadastro de usuários, automação de envio de e-mails, integração com API de IA).
 
----
+--- O desafio proposto pelo grupo foi criar um site para ajudar as pessoas a controlar suas finanças de forma que elas possam colocar todos os seus gastos, diários, semanais e mensais, suas rendas fixas como salário, suas despesas fixas como aluguel e após adicionar receita ou despesa o site faz relatórios em tempo real do seu saldo mensal explicando sua saúde financeira, também é possível dentro da plataforma colocar metas, como por exemplo a compra de uma viagem, uma casa, e dessa forma ele te auxilia nas economias ideais para que vc possa atingir sua meta.
 
 ## 🖥️ Protótipo
 

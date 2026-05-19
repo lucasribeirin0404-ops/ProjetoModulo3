@@ -62,6 +62,8 @@ Local: Laboratório de informática / Quadro branco
 
 Professor(a): Kadidja Valéria  
 
+Alunos: Lucas Ribeiro Silva Alves Saraiva - Isabelly Cristina Dos Santos Moreira
+
 ---
 
 ## 🚀 Próximos Passos
